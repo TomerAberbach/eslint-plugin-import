@@ -54,10 +54,10 @@ exports.default = function parse(path, content, context) {
 
   if (context == null) throw new Error('need context to parse properly');
 
-  let parserOptions = context.parserOptions;
-  const parserPath = getParserPath(path, context);
+  let { parserOptions } = context;
+  const { parserPath, parser } = getParser(path, context);
 
-  if (!parserPath) throw new Error('parserPath is required!');
+  if (!parser) throw new Error('parserPath or parser is required!');
 
   // hack: espree blows up with frozen options
   parserOptions = Object.assign({}, parserOptions);
@@ -83,9 +83,6 @@ exports.default = function parse(path, content, context) {
   delete parserOptions.project;
   delete parserOptions.projects;
 
-  // require the parser relative to the main module (i.e., ESLint)
-  const parser = moduleRequire(parserPath);
-
   // replicate bom strip and hashbang transform of ESLint
   // https://github.com/eslint/eslint/blob/b93af98b3c417225a027cabc964c38e779adb945/lib/linter/linter.js#L779
   content = transformHashbang(stripUnicodeBOM(String(content)));
@@ -104,7 +101,7 @@ exports.default = function parse(path, content, context) {
     if (!ast || typeof ast !== 'object') {
       console.warn(
         '`parseForESLint` from parser `' +
-          parserPath +
+          (parserPath || 'unknown') +
           '` is invalid and will just be ignored'
       );
     } else {
@@ -116,7 +113,7 @@ exports.default = function parse(path, content, context) {
   return makeParseReturn(ast, keysFromParser(parserPath, parser, undefined));
 };
 
-function getParserPath(path, context) {
+function getParser(path, context) {
   const parsers = context.settings['import/parsers'];
   if (parsers != null) {
     const extension = extname(path);
@@ -124,10 +121,15 @@ function getParserPath(path, context) {
       if (parsers[parserPath].indexOf(extension) > -1) {
         // use this alternate parser
         log('using alt parser:', parserPath);
-        return parserPath;
+        return { parserPath, parser: parserPath && moduleRequire(parserPath) };
       }
     }
   }
   // default to use ESLint parser
-  return context.parserPath;
+  return {
+    parserPath: context.parserPath,
+    parser: context.parserPath
+      ? moduleRequire(context.parserPath)
+      : context.parser,
+  };
 }

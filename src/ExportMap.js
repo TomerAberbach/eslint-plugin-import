@@ -784,13 +784,21 @@ export function recursivePatternCapture(pattern, callback) {
  * don't hold full context object in memory, just grab what we need.
  */
 function childContext(path, context) {
-  const { settings, parserOptions, parserPath } = context;
-  return {
-    settings,
-    parserOptions,
-    parserPath,
-    path,
-  };
+  const { settings, parserOptions, parserPath, languageOptions } = context;
+
+  const childContext = { settings, parserPath, path };
+
+  if (languageOptions) {
+    childContext.parserOptions = {
+      ecmaVersion: 'latest',
+      ...languageOptions.parserOptions,
+    };
+    childContext.parser = languageOptions.parser;
+  } else {
+    childContext.parserOptions = parserOptions;
+  }
+
+  return childContext;
 }
 
 

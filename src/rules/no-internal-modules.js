@@ -9,12 +9,14 @@ module.exports = {
   meta: {
     type: 'suggestion',
     docs: {
+      category: 'Static analysis',
+      description: 'Forbid importing the submodules of other modules.',
       url: docsUrl('no-internal-modules'),
     },
 
     schema: [
       {
-        oneOf: [
+        anyOf: [
           {
             type: 'object',
             properties: {

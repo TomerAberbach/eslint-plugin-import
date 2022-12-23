@@ -14,10 +14,14 @@ const traversed = new Set();
 module.exports = {
   meta: {
     type: 'suggestion',
-    docs: { url: docsUrl('no-cycle') },
+    docs: {
+      category: 'Static analysis',
+      description: 'Forbid a module from importing a module with a dependency path back to itself.',
+      url: docsUrl('no-cycle'),
+    },
     schema: [makeOptionsSchema({
       maxDepth: {
-        oneOf: [
+        anyOf: [
           {
             description: 'maximum dependency depth to traverse',
             type: 'integer',

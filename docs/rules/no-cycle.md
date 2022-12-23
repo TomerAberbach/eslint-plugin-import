@@ -1,5 +1,7 @@
 # import/no-cycle
 
+<!-- end auto-generated rule header -->
+
 Ensures that there is no resolvable path back to this module via its dependencies.
 
 This includes cycles of depth 1 (imported module imports me) to `"∞"` (or `Infinity`), if the
@@ -19,6 +21,8 @@ import { b } from './dep-b.js' // reported: Dependency cycle detected.
 
 This rule does _not_ detect imports that resolve directly to the linted module;
 for that, see [`no-self-import`].
+
+This rule ignores type-only imports in Flow and TypeScript syntax (`import type` and `import typeof`), which have no runtime effect.
 
 
 ## Rule Details

@@ -38,14 +38,14 @@ try {
       };
     } catch (e) {
       const { listFilesToProcess: originalListFilesToProcess } = require('eslint/lib/util/glob-util');
-      
+
       listFilesToProcess = function (src, extensions) {
         const patterns = src.reduce((carry, pattern) => {
           return carry.concat(extensions.map((extension) => {
             return /\*\*|\*\./.test(pattern) ? pattern : `${pattern}/**/*${extension}`;
           }));
         }, src.slice());
-    
+
         return originalListFilesToProcess(patterns);
       };
     }
@@ -364,7 +364,10 @@ const fileIsInPkg = file => {
   };
 
   const checkPkgFieldObject = pkgField => {
-    const pkgFieldFiles = values(pkgField).map(value => join(basePath, value));
+    const pkgFieldFiles = values(pkgField)
+      .filter((value) => typeof value !== 'boolean')
+      .map(value => join(basePath, value));
+
     if (includes(pkgFieldFiles, file)) {
       return true;
     }
@@ -408,7 +411,11 @@ const fileIsInPkg = file => {
 module.exports = {
   meta: {
     type: 'suggestion',
-    docs: { url: docsUrl('no-unused-modules') },
+    docs: {
+      category: 'Helpful warnings',
+      description: 'Forbid modules without exports, or exports without matching import in another module.',
+      url: docsUrl('no-unused-modules'),
+    },
     schema: [{
       properties: {
         src: {
